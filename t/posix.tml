@@ -1,0 +1,36 @@
+%TestML: 1.0
+
+# Needs a better idea of how to tokenize the input/output. Right know it's just
+# space-separated, but that'll break down
+
+=== Things that must be escaped
+--- standard: http://pubs.opengroup.org/onlinepubs/009695399/utilities/xcu_chap02.html#tag_02_02
+--- escape-these: asdf | & ; < > ( ) $ ` \ " ' <space> <tab> <newline>
+--- expect: asdf \| \& \; \< \> \( \) \$ \` \\ \" \' \<space> \<tab> \<newline>
+# (I'm not at all sure how to input the <space>/<tab>/<newline>)
+
+=== Backslash escaping
+--- standard: http://pubs.opengroup.org/onlinepubs/009695399/utilities/xcu_chap02.html#tag_02_02_01
+--- interpret: \' \\ \x
+--- expect: ' \ x
+
+=== Single quote enclosing
+--- standard: http://pubs.opengroup.org/onlinepubs/009695399/utilities/xcu_chap02.html#tag_02_02_02
+--- interpret: 'hi' 'hi''hi' 'bi'\'bi'
+--- expect: hi hihi bi'bi
+
+=== Double quote unaffected
+--- standard: http://pubs.opengroup.org/onlinepubs/009695399/utilities/xcu_chap02.html#tag_02_02_03
+# Uh-oh. sh itself leaves "!…" alone, but bash/zsh expand it. This is the first
+# incompatibility of sh vs {ba,z}sh. Can we make a grammar that's DRY between
+# all 3?
+--- interpret: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!@#%^&*()_+-=[]{}|;:',./<>?~♥"
+--- expect: abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!@#%^&*()_+-=[]{}|;:',./<>?~♥
+
+=== Double quote dollar
+--- standard: http://pubs.opengroup.org/onlinepubs/009695399/utilities/xcu_chap02.html#tag_02_02_03
+--- set: hi=42
+--- interpret: "$hi" "${hi}"
+--- expect: 42 42
+
+# TODO: Within the string of characters from an enclosed "${" to the matching '}', an even number of unescaped double-quotes or single-quotes, if any, shall occur. A preceding backslash character shall be used to escape a literal '{' or '}'. The rule in Parameter Expansion shall be used to determine the matching '}' .
